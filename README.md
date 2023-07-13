@@ -9,7 +9,7 @@
 - - Dashboard
 - - CRUD for Events including Event Images and Event Schedules
 - Interactivity present for Event Index and Show (currently accessible by all authenticated users)
-Design and developments from scratch:
+- Design and developments from scratch:
 - - Carousel of images with clickable bullets; carousels to the next image every 8 seconds with a time interval reset on bullet click (Events/Show)
 - - Events slide animation on scroll (Events/Index)
 - - Filtered Events (by Recent, Inactive, and Active) appear in their own horizontally scrollable containers (DashboardPlanner)
