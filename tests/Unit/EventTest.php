@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
-use Database\Seeders\UserGroupSeeder;
 use App\Models\User;
 use App\Models\UserGroup;
 use App\Models\Event;
@@ -18,7 +17,6 @@ class EventTest extends TestCase
 
     public function test_it_has_a_path(): void
     {
-        $this->seed(UserGroupSeeder::class);
         $userGroup = UserGroup::where('name', 'Planner')->first();
         $user = User::factory()->for($userGroup)->create();
 

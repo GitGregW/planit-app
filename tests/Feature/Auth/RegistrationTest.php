@@ -5,7 +5,6 @@ namespace Tests\Feature\Auth;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Database\Seeders\UserGroupSeeder;
 use Illuminate\Support\Facades\Auth;
 
 class RegistrationTest extends TestCase
@@ -23,9 +22,6 @@ class RegistrationTest extends TestCase
 
     public function test_new_users_can_register(): void
     {
-        $this->withoutExceptionHandling();
-        $this->seed(UserGroupSeeder::class);
-        
         /** As an Attendee user group */
         $response = $this->post('/register/attendee', [
             'name' => 'Test User',

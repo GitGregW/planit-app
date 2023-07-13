@@ -1,3 +1,21 @@
+<p align="center"><img style="width: 56px; height: 56px; margin: 7px 0;" src="public/icons/planet-earth.svg" /></p>
+
+## Commit 13-7-23
+
+- Created AuthenticateUserGroup Middleware to handle incoming route requests
+- Configured Storage for Event Images which now replaces Event Images eloquent relationship 
+- Frontend for Event Planner User (Mobile First Design)
+- - Basic Navigation Bar
+- - Dashboard
+- - CRUD for Events including Event Images and Event Schedules
+- Interactivity present for Event Index and Show (currently accessible by all authenticated users)
+Design and developments from scratch:
+- Carousel of images with clickable bullets; carousels to the next image every 8 seconds with a time interval reset on bullet click (Events/Show)
+- Events slide animation on scroll (Events/Index)
+- Filtered Events (by Recent, Inactive, and Active) appear in their own horizontally scrollable containers (DashboardPlanner)
+- Event Schedules open & close signs toggle form elements which reactively fill form patch and delete forms (Events/Edit)
+
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">

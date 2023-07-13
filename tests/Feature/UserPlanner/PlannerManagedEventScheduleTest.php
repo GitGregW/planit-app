@@ -14,6 +14,7 @@ class PlannerManagedEventScheduleTest extends TestCase
     
     public function test_a_planner_can_add_schedules_for_an_event(): void
     {
+        $this->withoutExceptionHandling();
         $this->signIn('Planner');
         $days = collect(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'])->shuffle()->take(4);
 
@@ -28,10 +29,11 @@ class PlannerManagedEventScheduleTest extends TestCase
 
     public function test_a_planner_can_update_schedules_for_an_event(): void
     {
-        $this->signIn('Planner');
+        $user = $this->signIn('Planner');
         $days = collect(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'])->shuffle()->take(4);
 
         $eventRes = Event::factory()
+            ->for($user)
             ->has(EventSchedule::factory()
                 ->count(4)
                 ->sequence(fn ($sequence) => ['day' => $days[$sequence->index]]))
@@ -39,18 +41,40 @@ class PlannerManagedEventScheduleTest extends TestCase
         
         $event = Event::where('id', $eventRes->id)->with(['eventSchedules'])->first();
 
-        $event->eventSchedules[2]->day = "Easter Bank Holiday";
-        $this->patch($event->path() . '/schedules', $event->toArray());
+        $event->eventSchedules[2]->closing_time = "14:55:00";
+        $this->patch($event->path() . '/schedules', $event->eventSchedules->toArray());
 
-        $this->assertDatabaseHas('event_schedules', ['day' => 'Easter Bank Holiday']);
+        $this->assertDatabaseHas('event_schedules', ['closing_time' => '14:55:00']);
     }
 
     public function test_a_planner_can_remove_schedules_for_an_event(): void
     {
-        $this->signIn('Planner');
+        $user = $this->signIn('Planner');
         $days = collect(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'])->shuffle()->take(4);
 
         $eventRes = Event::factory()
+            ->for($user)
+            ->has(EventSchedule::factory()
+                ->count(4)
+                ->sequence(fn ($sequence) => ['day' => $days[$sequence->index]]))
+                ->create();
+
+        $event = Event::where('id', $eventRes->id)->with(['eventSchedules'])->first();
+        
+        $this->actingAs($user)
+            ->delete($event->path() . '/schedules', [$event->eventSchedules[2]->day]);
+
+        $this->assertDatabaseCount('event_schedules', 3);
+    }
+
+    public function test_a_planner_can_modify_schedules_for_an_event(): void
+    {
+        $this->withoutExceptionHandling();
+        $user = $this->signIn('Planner');
+        $days = ['Thursday','Friday','Saturday','Sunday'];
+        
+        $eventRes = Event::factory()
+            ->for($user)
             ->has(EventSchedule::factory()
                 ->count(4)
                 ->sequence(fn ($sequence) => ['day' => $days[$sequence->index]]))
@@ -58,8 +82,22 @@ class PlannerManagedEventScheduleTest extends TestCase
         
         $event = Event::where('id', $eventRes->id)->with(['eventSchedules'])->first();
 
-        $event->deleteEventSchedule($event->eventSchedules[2]->toArray());
+        /** Changing an opening time */
+        $event->eventSchedules[2]->closing_time = "14:55:00";
+
+        /** Adding an opening time */
+        $event->eventSchedules->push([
+            'event_id' => $event->id,
+            'day' => 'Tuesday',
+            'opening_time' => '16:00:00',
+            'closing_time' => '10:00:00',
+        ]);
+
+        $this->patch($event->path() . '/schedules', $event->eventSchedules->toArray());
+        /** Deleting an opening time */
+        $this->delete($event->path() . '/schedules', [$event->eventSchedules[0]->day, $event->eventSchedules[3]->day]);
 
         $this->assertDatabaseCount('event_schedules', 3);
+        $this->assertDatabaseHas('event_schedules', ['closing_time' => '14:55:00']);
     }
 }

@@ -23,8 +23,8 @@ return new class extends Migration
             $table->string('county', 100);
             $table->string('postcode', 10);
             $table->string('contact_mobile', 20);
-            $table->string('contact_landline', 20);
-            $table->decimal('rating', 5, 1);
+            $table->string('contact_landline', 20)->nullable();
+            $table->decimal('rating', 5, 1)->nullable();
             $table->timestamps();
         });
     }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -36,11 +37,6 @@ class Event extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function eventImages(): HasMany
-    {
-        return $this->hasMany(EventImage::class);
-    }
-
     public function eventSchedules(): HasMany
     {
         return $this->hasMany(EventSchedule::class);
@@ -56,38 +52,30 @@ class Event extends Model
         return $this->belongsToMany(Tag::class);
     }
 
-    public function addImages($images)
+    public function getImages()
     {
-        if(is_string($images)) return $this->eventImages()->create(['src' => $images]);
-        return $this->eventImages()->createMany($images);
+        return Storage::disk('event_images')->files($this->id);
     }
 
-    public function deleteImages($eventImagesIds)
+    public function deleteImages()
     {
-        return $this->eventImages()->whereIn('id', $eventImagesIds)->delete();
+        return Storage::disk('event_images')->deleteDirectory($this->id);
     }
 
-    public function addTags($tags)
-    {
-        if(is_string($tags)) return $this->Tags()->create(
-            ['slug' => strtolower(str_replace(' ','-',$tags))],
-            ['name' => $tags]
-        );
-        foreach($tags as $key => $tag){
-            $tags[$key]['slug'] = strtolower(str_replace(' ','-',$tag['name']));
-        }
-        return $this->Tags()->createMany($tags);
-    }
+    // public function addTags($tags)
+    // {
+    //     if(is_string($tags)) return $this->Tags()->create(
+    //         ['slug' => strtolower(str_replace(' ','-',$tags))],
+    //         ['name' => $tags]
+    //     );
+    //     foreach($tags as $key => $tag){
+    //         $tags[$key]['slug'] = strtolower(str_replace(' ','-',$tag['name']));
+    //     }
+    //     return $this->Tags()->createMany($tags);
+    // }
 
-    public function deleteTags($eventTagIds)
-    {
-        return $this->tags()->detach($eventTagIds);
-    }
-
-    public function deleteEventSchedule($eventSchedule)
-    {
-        return $this->eventSchedules()->where('id', $eventSchedule['id'])->delete();
-    }
-
-
+    // public function deleteTags($eventTagIds)
+    // {
+    //     return $this->tags()->detach($eventTagIds);
+    // }
 }

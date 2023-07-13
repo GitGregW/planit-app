@@ -14,8 +14,8 @@ class PlannerManagedEventTagTest extends TestCase
 
     public function test_a_planner_can_create_an_event_with_tags(): void
     {
-        $this->signIn('Planner');
-        $event = Event::factory()->create();
+        $user = $this->signIn('Planner');
+        $event = Event::factory()->for($user)->create();
 
         $tags = [
             ['name' => 'Outdoors'],
@@ -26,24 +26,34 @@ class PlannerManagedEventTagTest extends TestCase
             ['name' => 'Instructor']
         ];
 
-        $event->addTags($tags);
+        /** To do: Assign slug through model validation of sorts */
+        foreach($tags as $key => $tag){
+            $tags[$key]['slug'] = strtolower(str_replace(' ','-',$tag['name']));
+        }
+
+        $this->actingAs($user)
+            ->post($event->path() . '/tags', $tags);
 
         $this->assertDatabaseCount('event_tag', 6);
     }
 
     public function test_a_planner_can_delete_tags_from_an_event(): void
     {
-        $this->signIn('Planner');
+        $this->withoutExceptionHandling();
+        $user = $this->signIn('Planner');
 
         $eventRes = Event::factory()
+            ->for($user)
             ->hasAttached(Tag::factory()
                 ->count(6))
                 ->create();
         
         $event = Event::where('id', $eventRes->id)->with(['tags'])->first();
 
-        $event->deleteTags([$event->tags[2]->id]);
-        $event->deleteTags([$event->tags[3]->id, $event->tags[4]->id]);
+        $this->actingAs($user)
+            ->delete($event->path() . '/tags/', [$event->tags[2]->id, $event->tags[3]->id]);
+        $this->actingAs($user)
+            ->delete($event->path() . '/tags/', [$event->tags[4]->id]);
 
         $this->assertDatabaseCount('event_tag', 3);
     }
