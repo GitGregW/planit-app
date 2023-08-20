@@ -3,7 +3,8 @@
     // import EventImage from '@/Pages/EventImages/Show.vue';
     // import EventSchedule from '@/Pages/EventSchedules/Show.vue';
     import { Head, Link } from '@inertiajs/vue3';
-    import { onMounted, onBeforeUnmount } from 'vue';
+    import { onMounted, onBeforeUnmount, reactive } from 'vue';
+    import mapboxgl from 'mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
 
     const props = defineProps({
         event: {
@@ -15,25 +16,57 @@
         schedules: {
             type: Object,
         },
+        mapboxToken: {
+            type: String,
+        },
     });
+    // props.mapboxToken ? mapboxgl.accessToken = props.mapboxToken : mapboxgl.accessToken = '';
 
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const d = new Date();
-    const today = days[d.getUTCDay() - 1];
-    if( !today ) today = 'Sunday';
+    let today = days[d.getUTCDay() - 1];
+    if( !today ){ today = 'Sunday'; }
     const imageCount = Object.keys(props.images).length;
     var i = 0;
     var carousel = window.setInterval(carouselImage, 8000);
-    
+    const mapContainer = 'mapContainer';
+    const mapData = reactive({
+        lng: -122.478779,
+        lat: 37.821385,
+        zoom: 9,
+        placeName: null
+    });
 
     onMounted(() => {
         window.onscroll = function() {scrollFunction()};
+        getMap();
     })
 
     onBeforeUnmount(() => {
         window.clearInterval(carousel);
         window.onscroll = null;
     })
+
+    function getMap() {
+        /** Retrieve Geocodes */
+        const xhttp = new XMLHttpRequest();
+        xhttp.onload = function() {
+            const geocodeData = JSON.parse(this.responseText);
+            mapData.lat = geocodeData["features"][0]["geometry"]["coordinates"][0];
+            mapData.lng = geocodeData["features"][0]["geometry"]["coordinates"][1];
+            mapData.placeName = geocodeData["features"][0]["place_name"];
+
+            /** Retrieve Map */
+            const map = new mapboxgl.Map({
+                container: mapContainer,
+                style: 'mapbox://styles/mapbox/streets-v12',
+                center: [geocodeData["features"][0]["geometry"]["coordinates"][0], geocodeData["features"][0]["geometry"]["coordinates"][1]],
+                zoom: mapData.zoom
+            });
+        }
+        xhttp.open("GET", "https://api.mapbox.com/geocoding/v5/mapbox.places/" + props.event.postcode + ".json?types=postcode&limit=1&access_token=" + props.mapboxToken);
+        xhttp.send();
+    }
 
     function timeFormatting(time){
         return new Date('1970-01-01T' + time + 'Z')
@@ -44,7 +77,7 @@
 
     function scrollFunction(){
         if (document.body.scrollTop > 80 || document.documentElement.scrollTop > 80) {
-            document.getElementById("headerPadding").setAttribute('class', 'py-14 transition-[padding] duration-500');
+            document.getElementById("headerPadding").setAttribute('class', 'py-8 transition-[padding] duration-500');
         } else {
             document.getElementById("headerPadding").setAttribute('class', 'py-28 transition-[padding] duration-500');
         }
@@ -73,7 +106,7 @@
     <Head :title="props.event.title" />
 
     <PlannerLayout>
-        <div class="fixed top-0 bg-gray-300">
+        <div class="fixed top-0 bg-gray-300 z-10">
             <div id="headerImage" :style="'background-image: url(' + '\'' + '/event_images/' + props.images[0] + '\'' + ');'" class="bg-cover bg-center w-screen">
                 <div id="headerPadding" @click="scrollTop()" class="py-28 transition-[padding] duration-500"></div>
                 <div class="w-screen bg-black/60 text-white">
@@ -111,23 +144,28 @@
             <div class="w-screen pt-2 pb-4 pl-4 pr-2 bg-white justify-center">
                 <p>{{ $props.event.description }}</p>
             </div>
-            <div class="grid grid-cols-7 border-y-2 border-yellow-600">
-                <p class="col-span-7 text-gray-700 text-sm text-semibold pl-3 py-1 bg-yellow-400">
+            <div class="border-y-2 border-yellow-600">
+                <p class="text-gray-700 text-sm text-semibold pl-3 py-1 bg-white">
                     Distance
                     <svg class="inline stroke-gray-700 fill-none stroke-2 w-4 h-4">
                         <use href="/icons/feather-sprite.svg#compass" />
                     </svg>
                     0.0 miles from [SEARCH POSTCODE]
                 </p>
-                <img src="/images/unsplash/planit/z-TrhLCn1abMU-unsplash.jpg" class="object-fill h-full w-full col-span-3" />
-                <ul class="py-2 px-4 decoration-none col-span-4 bg-white">
+
+                <div>
+                    <div :id="mapContainer" class="h-52"></div>
+                </div>
+                <!-- <img src="/images/unsplash/planit/z-TrhLCn1abMU-unsplash.jpg" class="object-fill h-52 py-2 px-4 bg-white w-full" /> -->
+
+                <ul class="grid grid-cols-2 grid-flow-dense px-8 py-2 pl-16 text-right decoration-none bg-white">
+                    <li class="row-span-4 text-gray-700 italic text-sm">Address</li>
                     <li>{{ $props.event.address_line_1 }}</li>
                     <li>{{ $props.event.address_line_2 }}</li>
                     <li>{{ $props.event.city }}</li>
                     <li>{{ $props.event.county }}</li>
+                    <li class="text-gray-700 italic text-sm">Postcode</li>
                     <li>{{ $props.event.postcode }}</li>
-                    <li>{{ $props.event.landline }}</li>
-                    <li>{{ $props.event.mobile }}</li>
                 </ul>
             </div>
             <ul class="text-sm w-fit text-right round-xl my-6 mx-auto divide-y-4 divide-gray-200 rounded-sm">
@@ -140,6 +178,16 @@
                     </div>
                 </li>
                 <!-- List for custom dates here. -->
+            </ul>
+            <ul class="text-sm w-fit text-right round-xl my-6 mx-auto divide-y-4 divide-gray-200 rounded-sm">
+                <li class="grid grid-cols-2 gap-3 px-4 py-1 bg-gray-50">
+                    <div class="font-semibold text-md">tel Mobile</div>
+                    <div class="">{{ $props.event.contact_mobile }}</div>
+                </li>
+                <li class="grid grid-cols-2 gap-3 px-4 py-1 bg-gray-50">
+                    <div class="font-semibold text-md">tel Landline</div>
+                    <div class="">{{ $props.event.contact_landline }}</div>
+                </li>
             </ul>
         </div>
     </PlannerLayout>

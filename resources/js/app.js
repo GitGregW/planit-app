@@ -1,5 +1,6 @@
 import './bootstrap';
 import '../css/app.css';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';

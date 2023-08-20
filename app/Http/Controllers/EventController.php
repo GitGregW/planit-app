@@ -12,16 +12,16 @@ class EventController extends Controller
 {
     public function index(){
         Auth::user()->userGroup()->first()->name == "Planner"
-            ? $events = Auth::User()->events()->get()->transform(function ($event){
+            ? $events = Auth::User()->events()->latest()->get()->transform(function ($event){
                 $file = Storage::disk('event_images')->files($event->id);
                 $file ? $event->src = $file[0] : $event->src = '0/cZ5V1tlwn8vtCm4y0TmplP3wFuXPVnwlutSy4HVT.jpg';
                 return $event;
             })
-            : $events = Event::get();
-        
-        // $events->tap(function ($event){
-        //     append(['src' => $event->getImages()]);
-        // });
+            : $events = Event::where('is_active', 1)->latest()->get()->transform(function ($event){
+                $file = Storage::disk('event_images')->files($event->id);
+                $file ? $event->src = $file[0] : $event->src = '0/cZ5V1tlwn8vtCm4y0TmplP3wFuXPVnwlutSy4HVT.jpg';
+                return $event;
+            });
         
         return Inertia::render('Events/Index', ['events' => $events]);
     }
@@ -44,7 +44,7 @@ class EventController extends Controller
         ]);
         $validated['user_id'] = Auth::user()->id;
         $validated['slug'] = $request['title'] ?
-            strtolower(str_replace(' ', '_', $request['title'])) : '';
+            strtolower(str_replace(' ', '-', $request['title'])) : '';
 
         $event = Event::create($validated);
         return Inertia::render('Events/Edit', ['event' => $event]);
@@ -53,9 +53,10 @@ class EventController extends Controller
     public function show(Event $event){
         $images = $event->getImages();
         $schedules = $event->eventSchedules()->get()->keyBy('day');
+        $token = file_get_contents('mapbox_token.txt', 'r');
 
         return Inertia::render('Events/Show',
-            ['event' => $event, 'images' => $images, 'schedules' => $schedules]
+            ['event' => $event, 'images' => $images, 'schedules' => $schedules, 'mapboxToken' => $token]
         );
     }
 

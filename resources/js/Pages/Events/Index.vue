@@ -45,7 +45,7 @@
 <template>
     <Head title="Events" />
     <PlannerLayout>
-        <div v-if="$page.props.auth.user.user_group_id == 2" class="flex justify-between w-full mb-3 py-3 px-4 bg-yellow-500">
+        <div v-if="$page.props.auth.user.user_group_id == 2" class="flex justify-between w-full mb-3 py-3 px-4 bg-yellow-400">
             <Link :href="route('events.create')" class="text-sm bg-white px-2 border border-gray-200 border-2 rounded">
                 <svg class="inline stroke-black fill-none w-4 h-4">
                     <use href="/icons/feather-sprite.svg#plus" />
@@ -54,7 +54,7 @@
             </Link>
             <div class="text-2xl font-semibold">Your Events</div>
         </div>
-        <div v-else>Events</div>
+        <div v-else class="text-2xl font-semibold w-full mb-3 py-3 px-4 bg-yellow-400">Events</div>
         <div class="flex flex-col gap-12 mb-12">
             <Link v-for="(event, index) in props.events" :href="route('events.show', [event.slug])">
                 <div :id="'eventItem' + index" :style="'background-image: url(' + '\'' + '/event_images/' + event.src + '\'' + ');'"

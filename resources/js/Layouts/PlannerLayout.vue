@@ -18,7 +18,7 @@ import { Link } from '@inertiajs/vue3';
             <slot />
         </main>
 
-        <div class="fixed bottom-0 w-full">
+        <div class="fixed bottom-0 w-full" style="z-index:9;">
             <div class="flex justify-between p-2 bg-yellow-400">
                 <Link href="/dashboard">
                     <svg class="w-8 h-8 mx-2 fill-white">
@@ -27,7 +27,7 @@ import { Link } from '@inertiajs/vue3';
                 </Link>
                 <div class="flex justify-between gap-4 pr-2 my-auto">
                     <Link :href="route('events.index')" :class="$page.component == 'Events/Index' ? 'text-white font-semibold underline' : 'text-gray-700'">Events</Link>
-                    <span class="text-gray-700">Bookings</span>
+                    <Link :href="route('event_bookings.index')" :class="$page.component == 'EventBookings/Index' ? 'text-white font-semibold underline' : 'text-gray-700'">Bookings</Link>
                     <!-- Tbc. -->
                     <span class="text-gray-700">
                         {{ $page.props.auth.user.name }}

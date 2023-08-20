@@ -5,6 +5,7 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Event;
 use App\Models\User;
+use App\Models\UserGroup;
 use DateTime;
 
 /**
@@ -22,10 +23,11 @@ class EventBookingFactory extends Factory
         $beginsAt = $this->faker->dateTimeBetween('+2 days', '+3 weeks');
         $endsAt = new DateTime($beginsAt->format('Y-m-d H:i:s'));
         $endsAt->modify('+' . ($this->faker->numberBetween(2,48) * 30) . ' minutes');
+        $attendee = UserGroup::where('name', 'Attendee')->first();
         
         return [
             'event_id' => Event::factory(),
-            'user_id' => User::factory(),
+            'user_id' => User::factory()->for($attendee),
             'begins_at' => $beginsAt->format('Y-m-d H:i:s'),
             'ends_at' => $endsAt->format('Y-m-d H:i:s'),
             'price' => $this->faker->randomFloat(1, 5, 80),

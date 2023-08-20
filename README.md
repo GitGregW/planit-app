@@ -1,4 +1,16 @@
-<p align="center"><img style="width: 56px; height: 56px; margin: 7px 0;" src="public/icons/planet-earth.svg" /></p>
+<p align="center"><img style="width: 56px; height: 56px; margin: 7px 0; fill: #facc15;" src="public/icons/planet-earth.svg" /></p>
+
+## Commit for 4-8-23
+
+- Frontend for Event Attendee User (Mobile First Design)
+- - Create, Index and Cancel for Event Bookings
+- Installed Mapbox API package to display map location having first geocoded the Event postcode (Event/Show)
+- Design and developments from scratch:
+- - An interactive booking diary on a horizontal scroll where each calendered month shows both the closed dates (muted disabled) and open dates; clicking an open date provides a drop down of bookable opening hour slots (EventBookings/Create)
+- - A booking confirmation form appears below the interactive booking diary upon selecting a booking slot (EventBookings/Create)
+- - An Attendee schedule follows successful booking; grouped by calendar month shows the Attendee any Event Bookings they have (EventBookings/Index)
+- - Event Booking schedule cancel link with confirm statement, upon cancelling displays an animated timed cancellation confirmation notification (EventBookings/Index)
+- Database seeding with combination of english and latin seeds
 
 ## Commit 13-7-23
 
@@ -9,11 +21,11 @@
 - - Dashboard
 - - CRUD for Events including Event Images and Event Schedules
 - Interactivity present for Event Index and Show (currently accessible by all authenticated users)
-Design and developments from scratch:
-- Carousel of images with clickable bullets; carousels to the next image every 8 seconds with a time interval reset on bullet click (Events/Show)
-- Events slide animation on scroll (Events/Index)
-- Filtered Events (by Recent, Inactive, and Active) appear in their own horizontally scrollable containers (DashboardPlanner)
-- Event Schedules open & close signs toggle form elements which reactively fill form patch and delete forms (Events/Edit)
+- Design and developments from scratch:
+- - Carousel of images with clickable bullets; carousels to the next image every 8 seconds with a time interval reset on bullet click (Events/Show)
+- - Events slide animation on scroll (Events/Index)
+- - Filtered Events (by Recent, Inactive, and Active) appear in their own horizontally scrollable containers (DashboardPlanner)
+- - Event Schedules open & close signs toggle form elements which reactively fill form patch and delete forms (Events/Edit)
 
 
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>

@@ -9,6 +9,7 @@ use App\Http\Controllers\EventTagController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Models\Event;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,11 +23,18 @@ use Inertia\Inertia;
 */
 
 Route::get('/', function () {
+    $activeEvents = Event::where('is_active', 1)->limit(5)->latest()->get()->transform(function ($event){
+        $file = Storage::disk('event_images')->files($event->id);
+        $file ? $event->src = $file[0] : $event->src = '0/cZ5V1tlwn8vtCm4y0TmplP3wFuXPVnwlutSy4HVT.jpg';
+        return $event;
+    });
+    $activeEventsCount = Event::where('is_active', 1)->count();
+
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
+        'activeEvents' => $activeEvents,
+        'activeEventsCount' => $activeEventsCount,
     ]);
 })->name('home');
 
@@ -38,7 +46,7 @@ require __DIR__.'/auth.php';
 
 Route::middleware('user_group:Planner')->group(function (){
     Route::get('/dashboard', function () {
-        $recentEvents = Auth::User()->events()->limit(3)->latest()->get()->transform(function ($event){
+        $recentEvents = Auth::User()->events()->where('is_active', 1)->limit(3)->latest()->get()->transform(function ($event){
             $file = Storage::disk('event_images')->files($event->id);
             $file ? $event->src = $file[0] : $event->src = $event->src = '0/cZ5V1tlwn8vtCm4y0TmplP3wFuXPVnwlutSy4HVT.jpg';
             return $event;
@@ -88,8 +96,9 @@ Route::middleware('user_group:Attendee')->group(function (){
     //     return Inertia::render('Dashboard');
     // })->name('dashboard');
 
-    Route::post('/event-bookings', [EventBookingController::class, 'store']);
-    Route::get('/event-bookings/{event_booking}/create', [EventBookingController::class, 'create'])->name('event_bookings.create');
+    Route::get('/event-bookings', [EventBookingController::class, 'index'])->name('event_bookings.index');
+    Route::post('/event-bookings/{event:slug}', [EventBookingController::class, 'store'])->name('event_bookings.store');
+    Route::get('/event-bookings/{event:slug}/create', [EventBookingController::class, 'create'])->name('event_bookings.create');
     Route::get('/event-bookings/{event_booking}', [EventBookingController::class, 'show'])->name('event_bookings.show');
     Route::patch('/event-bookings/{event_booking}', [EventBookingController::class, 'update'])->name('event_bookings.update');
     Route::delete('/event-bookings/{event_booking}', [EventBookingController::class, 'destroy'])->name('event_bookings.destroy');

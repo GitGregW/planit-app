@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('event_id')->constrained()->cascadeOnDelete();
             $table->string('src');
-            $table->boolean('is_portrait')->nullable()->default(false);
             $table->timestamps();
         });
     }

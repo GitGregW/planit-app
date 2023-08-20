@@ -53,7 +53,6 @@ class PlannerManagedEventTest extends TestCase
             'postcode' => 'FO12 3BA',
             'contact_mobile' => '01234',
             'contact_landline' => '06789',
-            'rating' => 5
         ];
         $this->get('events/create')->assertStatus(200);
 

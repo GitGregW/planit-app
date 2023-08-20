@@ -12,14 +12,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        /** Setup User Groups table */
         $this->call([
             UserGroupSeeder::class,
-        ]);
-        // \App\Models\User::factory(10)->create();
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+            /**
+             * FACTORY SEED FOR DEMO
+             */
+            FactoryLatinSeeder::class,
+            FactoryEnglishSeeder::class,
+        ]); 
     }
 }

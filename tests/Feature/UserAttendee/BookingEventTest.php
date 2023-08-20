@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Event;
@@ -21,13 +22,13 @@ class BookingEventTest extends TestCase
 
         $eventBooking = EventBooking::factory()
             ->state([
-                'user_id' => $planner,
-                'event_id' => $event,
+                'user_id' => $planner->id,
+                'event_id' => $event->id,
             ])
             ->raw();
 
         $this->actingAs($planner)
-            ->post('/event-bookings', $eventBooking)
+            ->post('/event-bookings/' . $event->slug, $eventBooking)
             ->assertRedirect('/');
         
         $this->assertDatabaseCount('event_bookings', 0);
@@ -39,19 +40,33 @@ class BookingEventTest extends TestCase
         $event = Event::factory()->create();
 
         $eventBooking = EventBooking::factory()
-            ->state([
-                'user_id' => $attendee,
-                'event_id' => $event,
-            ])
+            ->for($attendee)
+            ->for($event)
             ->raw();
-
         $response = $this
             ->actingAs($attendee)
-            ->post('/event-bookings', $eventBooking);
-        $eventBooking = EventBooking::first();
+            ->post('/event-bookings/' . $event->slug, $eventBooking)
+            ->assertRedirect('/event-bookings');
 
-        $response->assertRedirect('/event-bookings/' . $eventBooking->id);
+        $eventBooking = EventBooking::first();
         $this->assertDatabaseCount('event_bookings', 1);
+    }
+
+    public function test_an_attendee_can_view_their_booked_events(): void
+    {
+        $attendee = $this->signIn('Attendee');
+        $eventBooking = EventBooking::factory()
+            ->for($attendee)
+            ->count(10)
+            ->create();
+
+        $this->get('/event-bookings')
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('EventBookings/Index')
+                ->has('groupedEventBookings', fn (Assert $page) => $page
+                    ->where('0.event_id', $eventBooking->event_id)
+                )
+            );
     }
 
     public function test_an_attendee_can_modify_an_event_booking(): void

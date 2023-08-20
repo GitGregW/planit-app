@@ -28,7 +28,6 @@ class EventImageFactory extends Factory
         return [
             'event_id' => Event::factory(),
             'src' => $path . $this->faker->randomElement($jpegs),
-            'is_portrait' => $this->faker->numberBetween(0, 1),
         ];
     }
 }

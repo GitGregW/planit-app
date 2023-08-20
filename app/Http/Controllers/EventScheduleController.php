@@ -17,7 +17,6 @@ class EventScheduleController extends Controller
     }
 
     public function store(Event $event, Request $request){
-        dd($request);
         $schedules = $request->toArray();
         $event->eventSchedules()->createMany($schedules);
         // return json_encode("Schedules added.");

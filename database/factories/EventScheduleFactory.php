@@ -18,8 +18,7 @@ class EventScheduleFactory extends Factory
     public function definition(): array
     {
         $days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday','Bank Holiday','other'];
-        $key = $this->faker->randomDigitNot(9);
-        // $custom = $key > 6 ? 1 : 0;
+        $key = $this->faker->numberBetween(0,6);
         
         return [
             'event_id' => Event::factory(),

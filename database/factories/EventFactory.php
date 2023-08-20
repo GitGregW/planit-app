@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\User;
+use App\Models\UserGroup;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Event>
@@ -19,9 +20,10 @@ class EventFactory extends Factory
     {
         $slug = $this->faker->slug(3, false);
         $title = ucwords(str_replace('-',' ',$slug));
+        $planner = UserGroup::where('name', 'Planner')->first();
 
         return [
-            'user_id' => User::factory(),
+            'user_id' => User::factory()->for($planner),
             'slug' => $slug,
             'title' => $title,
             'description' => $this->faker->paragraphs(2, true),
