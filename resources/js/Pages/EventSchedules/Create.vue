@@ -1,5 +1,5 @@
 <script setup>
-    import { Link, router } from '@inertiajs/vue3';
+    import { Link, router, useForm } from '@inertiajs/vue3';
     import { reactive } from 'vue'
 
     const props = defineProps({
@@ -12,7 +12,8 @@
     });
 
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    const form = reactive({});
+    // const form = reactive({});
+    const form = useForm({});
     const deleteForm = reactive({});
 
     const emit = defineEmits(['submittedSchedules'])
@@ -37,7 +38,8 @@
             }, 
             onFinish: () => {
                 return emit('submittedSchedules');
-            }
+            },
+            errorBag: 'createSchedules',
         })
         // document.getElementById('schedulesForm').style.display = 'none';
     }
@@ -99,6 +101,9 @@
                         <div class="relative w-fit">
                             <input type="time" :id='"closing_time" + i' v-model="form[day].closing_time">
                         </div>
+                    </div>
+                    <div v-if="$page.props.errors.createSchedules">
+                        {{ $page.props.errors.createSchedules.opening_time }} and {{ $page.props.errors.createSchedules.closing_time }}
                     </div>
                 </div>
                 <!-- Capacity & Custom Dates for a later iteration -->

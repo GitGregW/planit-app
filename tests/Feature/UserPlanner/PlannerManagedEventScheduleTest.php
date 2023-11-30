@@ -29,6 +29,7 @@ class PlannerManagedEventScheduleTest extends TestCase
 
     public function test_a_planner_can_update_schedules_for_an_event(): void
     {
+        $this->withoutExceptionHandling();
         $user = $this->signIn('Planner');
         $days = collect(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'])->shuffle()->take(4);
 
@@ -41,6 +42,7 @@ class PlannerManagedEventScheduleTest extends TestCase
         
         $event = Event::where('id', $eventRes->id)->with(['eventSchedules'])->first();
 
+        $event->eventSchedules[2]->opening_time = "12:00:00";
         $event->eventSchedules[2]->closing_time = "14:55:00";
         $this->patch($event->path() . '/schedules', $event->eventSchedules->toArray());
 
@@ -83,13 +85,14 @@ class PlannerManagedEventScheduleTest extends TestCase
         $event = Event::where('id', $eventRes->id)->with(['eventSchedules'])->first();
 
         /** Changing an opening time */
+        $event->eventSchedules[2]->opening_time = "12:00:00";
         $event->eventSchedules[2]->closing_time = "14:55:00";
 
         /** Adding an opening time */
         $event->eventSchedules->push([
             'event_id' => $event->id,
             'day' => 'Tuesday',
-            'opening_time' => '16:00:00',
+            'opening_time' => '08:00:00',
             'closing_time' => '10:00:00',
         ]);
 

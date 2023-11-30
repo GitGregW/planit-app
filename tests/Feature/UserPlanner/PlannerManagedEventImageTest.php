@@ -14,47 +14,6 @@ class PlannerManagedEventImageTest extends TestCase
 {
     use RefreshDatabase;
 
-    // public function test_a_planner_can_add_images_to_an_event(): void
-    // {
-    //     $user = $this->signIn('Planner');
-    //     $event = Event::factory()->for($user)->create();
-
-    //     $images = [
-    //         ['src' => '/images/unsplash/events/adam-whitlock-I9j8Rk-JYFM-unsplash.jpg'],
-    //         ['src' => '/images/unsplash/events/aedrian-BshM9VkzGw8-unsplash.jpg']
-    //     ];
-    //     $this->actingAs($user)
-    //         ->post($event->path() . '/images', $images);
-
-    //     $image = ['src' => '/images/unsplash/events/aedrian-BshM9VkzGw8-unsplash.jpg'];
-    //     $this->actingAs($user)
-    //         ->post($event->path() . '/images', $image);
-
-    //     $this->assertDatabaseCount('event_images', 3);
-    // }
-
-    // public function test_a_planner_can_delete_images_from_an_event(): void
-    // {
-    //     $user = $this->signIn('Planner');
-    //     $eventRes = Event::factory()
-    //         ->for($user)
-    //         ->has(EventImage::factory()
-    //             ->count(4))
-    //             ->create();
-        
-    //     $event = Event::where('id', $eventRes->id)->with(['eventImages'])->first();
-    //     $this->actingAs($user)
-    //         ->delete($event->path() . '/images/' . $event->eventImages[2]->id);
-    //     $this->actingAs($user)
-    //         ->delete($event->path() . '/images/' . $event->eventImages[0]->id);
-    //     $this->actingAs($user)
-    //         ->delete($event->path() . '/images/' . $event->eventImages[3]->id);
-    //     // $this->actingAs($user)
-    //     //     ->delete($event->path() . '/images/' . [$event->eventImages[2]->id, $event->eventImages[3]->id]);
-
-    //     $this->assertDatabaseCount('event_images', 1);
-    // }
-
     public function test_images_can_be_uploaded_related_to_an_event(): void
     {
         Storage::fake('event_images');
@@ -89,4 +48,39 @@ class PlannerManagedEventImageTest extends TestCase
 
         Storage::disk('event_images')->assertExists($event['id'] . '/' . $file->hashName());
     }
+
+    // public function test_a_planner_can_persist_images_to_an_event(): void
+    // {
+    //     $user = $this->signIn('Planner');
+    //     $event = Event::factory()->for($user)->create();
+
+    //     $img1 = UploadedFile::fake()->image($event['id'] . '/image1.jpg');
+    //     $img2 = UploadedFile::fake()->image($event['id'] . '/image2.jpg');
+    //     $this->post($event->path() . '/images', ['src' => $img1]);
+    //     $this->post($event->path() . '/images', ['src' => $img2]);
+
+    //     $this->assertDatabaseCount('event_images', 2);
+    // }
+
+    // public function test_a_planner_can_delete_images_from_an_event(): void
+    // {
+    //     $user = $this->signIn('Planner');
+    //     $eventRes = Event::factory()
+    //         ->for($user)
+    //         ->has(EventImage::factory()
+    //             ->count(4))
+    //             ->create();
+        
+    //     $event = Event::where('id', $eventRes->id)->with(['eventImages'])->first();
+    //     $this->actingAs($user)
+    //         ->delete($event->path() . '/images/' . $event->eventImages[2]->id);
+    //     $this->actingAs($user)
+    //         ->delete($event->path() . '/images/' . $event->eventImages[0]->id);
+    //     $this->actingAs($user)
+    //         ->delete($event->path() . '/images/' . $event->eventImages[3]->id);
+    //     // $this->actingAs($user)
+    //     //     ->delete($event->path() . '/images/' . [$event->eventImages[2]->id, $event->eventImages[3]->id]);
+
+    //     $this->assertDatabaseCount('event_images', 1);
+    // }
 }

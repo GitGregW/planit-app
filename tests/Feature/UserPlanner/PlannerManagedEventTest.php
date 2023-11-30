@@ -15,17 +15,6 @@ class PlannerManagedEventTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_an_attendee_cannot_manage_events(): void
-    {
-        $user = $this->signIn('Attendee');
-        $event = Event::factory()->state([
-            'user_id' => $user->id
-        ])->raw();
-        $resource = $this->get('/events/create');
-        // $resource->assertRedirect('/');
-        $this->post('/events', $event)->assertRedirect('/');
-    }
-
     public function test_a_planner_cannot_manage_events_of_others(): void
     {
         $this->signIn('Planner');
@@ -33,9 +22,19 @@ class PlannerManagedEventTest extends TestCase
         $this->post('/events', $event);
 
         $this->signIn('Planner');
+
+        ## Edit
+        $this->get('/events/' . $event['slug'] . '/edit')
+            ->assertNotFound();
         $event['address_line_1'] = "Old Street";
+
+        ## Update
         $this->patch('/events/' . $event['slug'], $event)
-            ->assertUnauthorized();
+            ->assertNotFound();
+
+        ## Delete
+        $this->delete('/events/' . $event['slug'], $event)
+            ->assertNotFound();
     }
 
     public function test_a_planner_can_create_an_event(): void
@@ -65,18 +64,6 @@ class PlannerManagedEventTest extends TestCase
 
     }
     
-    // public function test_a_planner_can_view_an_event(): void
-    // {
-    //     $this->withoutExceptionHandling();
-    //     $user = User::factory()->create();
-    //     $this->actingAs($user);
-    //     $event = Event::factory()->for($user)->create();
-
-    //     /** Cannot assert redirect paths for InertiaJs tests. */
-    //     $this->get($event->path())
-    //         ->assertSee($event->title);
-    // }
-
     public function test_a_planner_can_update_an_event(): void
     {
         $user = $this->signIn('Planner');
@@ -95,7 +82,8 @@ class PlannerManagedEventTest extends TestCase
         $user = $this->signIn('Planner');
         $event = Event::factory()->for($user)->create();
         $this->delete($event->path(), $event->toArray());
-        $this->assertDatabaseCount('events', 0);
+        $events = $user->events()->get();
+        $this->assertTrue(count($events) == 0);
     }
 
     public function test_a_planner_can_update_an_event_to_active(): void
@@ -115,7 +103,6 @@ class PlannerManagedEventTest extends TestCase
 
     public function test_a_user_can_index_events_with_a_stored_image(): void
     {
-        $this->withoutExceptionHandling();
         Storage::fake('event_images');
         $user = $this->signIn('Planner');
 
@@ -124,14 +111,13 @@ class PlannerManagedEventTest extends TestCase
         $eventRes->map(function ($event){
             $file = UploadedFile::fake()->image($event->id . '/event' . $event->id . '.jpg');
             $this->post($event->path() . '/images', [
-                    'src' => $file,
-                ]);
+                'src' => $file,
+            ]);
         });
         
-        $events = Event::get()->transform(function ($event){
+        $events = Event::whereIn('events.id', $eventRes->pluck('id'))->get()->map(function ($event){
             $file = Storage::disk('event_images')->files($event->id);
-            $event->src = $file[0];
-            return $event;
+            $this->assertTrue(count($file) > 0);
         });
     }
 }

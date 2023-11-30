@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,5 +27,17 @@ class EventBooking extends Model
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class);
+    }
+
+    public function setDates()
+    {
+        $this->monthYear = date('F-Y', strtotime($this->begins_at));
+        $this->day = intval(date('d', strtotime($this->begins_at)));
+    }
+
+    public function setImage()
+    {
+        $file = Storage::disk('event_images')->files($this->event_id);
+        $this->src = $file ? $file[0] : $this->src = Storage::disk('event_images')->files('0');
     }
 }

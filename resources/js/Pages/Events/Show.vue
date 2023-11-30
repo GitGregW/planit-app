@@ -1,7 +1,5 @@
 <script setup>
     import PlannerLayout from '@/Layouts/PlannerLayout.vue';
-    // import EventImage from '@/Pages/EventImages/Show.vue';
-    // import EventSchedule from '@/Pages/EventSchedules/Show.vue';
     import { Head, Link } from '@inertiajs/vue3';
     import { onMounted, onBeforeUnmount, reactive } from 'vue';
     import mapboxgl from 'mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
@@ -20,7 +18,7 @@
             type: String,
         },
     });
-    // props.mapboxToken ? mapboxgl.accessToken = props.mapboxToken : mapboxgl.accessToken = '';
+    props.mapboxToken ? mapboxgl.accessToken = props.mapboxToken : mapboxgl.accessToken = '';
 
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const d = new Date();
@@ -28,7 +26,7 @@
     if( !today ){ today = 'Sunday'; }
     const imageCount = Object.keys(props.images).length;
     var i = 0;
-    var carousel = window.setInterval(carouselImage, 8000);
+    var carousel = props.images[0] ? window.setInterval(carouselImage, 8000) : '';
     const mapContainer = 'mapContainer';
     const mapData = reactive({
         lng: -122.478779,
@@ -43,7 +41,7 @@
     })
 
     onBeforeUnmount(() => {
-        window.clearInterval(carousel);
+        if(carousel){ window.clearInterval(carousel); }
         window.onscroll = null;
     })
 
@@ -77,9 +75,9 @@
 
     function scrollFunction(){
         if (document.body.scrollTop > 80 || document.documentElement.scrollTop > 80) {
-            document.getElementById("headerPadding").setAttribute('class', 'py-8 transition-[padding] duration-500');
+            document.getElementById("headerPadding").setAttribute('class', 'py-8 md:py-12 lg:py-16 transition-[padding] duration-500');
         } else {
-            document.getElementById("headerPadding").setAttribute('class', 'py-28 transition-[padding] duration-500');
+            document.getElementById("headerPadding").setAttribute('class', 'py-28 md:py-40 lg:54 transition-[padding] duration-500');
         }
     }
 
@@ -107,10 +105,10 @@
 
     <PlannerLayout>
         <div class="fixed top-0 bg-gray-300 z-10">
-            <div id="headerImage" :style="'background-image: url(' + '\'' + '/event_images/' + props.images[0] + '\'' + ');'" class="bg-cover bg-center w-screen">
-                <div id="headerPadding" @click="scrollTop()" class="py-28 transition-[padding] duration-500"></div>
+            <div id="headerImage" :style="props.images[0] ? 'background-image: url(' + '\'' + '/event_images/' + props.images[0] + '\'' + ');' : 'bg-gray-300'" class="bg-cover bg-center w-screen">
+                <div id="headerPadding" @click="scrollTop()" class="py-28 md:py-40 lg:54 transition-[padding] duration-500"></div>
                 <div class="w-screen bg-black/60 text-white">
-                    <div class="flex place-content-center border-b border-white">
+                    <div v-if="props.images[0]" class="flex place-content-center border-b border-white">
                         <svg v-for="(image, index) in props.images" :id="'image' + index" @click="selectImage(index)" :class="'inline stroke-white stroke-2 w-8 h-8 p-2 cursor-pointer ' + (index ? 'fill-none' : 'fill-yellow-500/50')">
                             <use href="/icons/feather-sprite.svg#circle" />
                         </svg>
@@ -123,8 +121,8 @@
                 </div>
             </div>
         </div>
-        <div class="relative mt-80">
-            <div v-if="$page.props.auth.user.user_group_id == 2" class="absolute top-2">
+        <div class="relative mt-80 md:px-3 lg:px-5 xl:px-7">
+            <div v-if="$page.props.auth.user.id == props.event.user_id" class="absolute top-2">
                 <Link :href="route('events.edit', [props.event.slug])" class="text-md bg-white pl-2 pr-4 py-1 border border-orange-600 border-2 rounded ml-4">
                     <svg class="inline stroke-black fill-none w-4 h-4">
                         <use href="/icons/feather-sprite.svg#edit-2" />
@@ -153,22 +151,20 @@
                     0.0 miles from [SEARCH POSTCODE]
                 </p>
 
-                <div>
-                    <div :id="mapContainer" class="h-52"></div>
+                <div class="lg:grid grid-cols-3">
+                    <div :id="mapContainer" class="h-52 lg:col-span-2"></div>
+                    <ul class="grid grid-cols-2 grid-flow-dense px-8 py-2 pl-16 text-right decoration-none bg-white">
+                        <li class="row-span-4 text-gray-700 italic text-sm">Address</li>
+                        <li>{{ $props.event.address_line_1 }}</li>
+                        <li>{{ $props.event.address_line_2 }}</li>
+                        <li>{{ $props.event.city }}</li>
+                        <li>{{ $props.event.county }}</li>
+                        <li class="text-gray-700 italic text-sm">Postcode</li>
+                        <li>{{ $props.event.postcode }}</li>
+                    </ul>
                 </div>
-                <!-- <img src="/images/unsplash/planit/z-TrhLCn1abMU-unsplash.jpg" class="object-fill h-52 py-2 px-4 bg-white w-full" /> -->
-
-                <ul class="grid grid-cols-2 grid-flow-dense px-8 py-2 pl-16 text-right decoration-none bg-white">
-                    <li class="row-span-4 text-gray-700 italic text-sm">Address</li>
-                    <li>{{ $props.event.address_line_1 }}</li>
-                    <li>{{ $props.event.address_line_2 }}</li>
-                    <li>{{ $props.event.city }}</li>
-                    <li>{{ $props.event.county }}</li>
-                    <li class="text-gray-700 italic text-sm">Postcode</li>
-                    <li>{{ $props.event.postcode }}</li>
-                </ul>
             </div>
-            <ul class="text-sm w-fit text-right round-xl my-6 mx-auto divide-y-4 divide-gray-200 rounded-sm">
+            <ul class="text-sm w-fit text-right round-xl py-6 mx-auto divide-y-4 divide-gray-200 rounded-sm">
                 <li v-for="day in days" :class="'grid grid-cols-3 gap-3 px-2 py-1 bg-white ' + (today == day ? 'border-l-8 border-yellow-500' : '')">
                     <div class="font-semibold text-md">{{ day }}</div>
                     <div v-if="schedules[day]" class="col-span-2">
@@ -179,7 +175,7 @@
                 </li>
                 <!-- List for custom dates here. -->
             </ul>
-            <ul class="text-sm w-fit text-right round-xl my-6 mx-auto divide-y-4 divide-gray-200 rounded-sm">
+            <ul class="text-sm w-fit text-right round-xl py-6 mx-auto divide-y-4 divide-gray-200 rounded-sm">
                 <li class="grid grid-cols-2 gap-3 px-4 py-1 bg-gray-50">
                     <div class="font-semibold text-md">tel Mobile</div>
                     <div class="">{{ $props.event.contact_mobile }}</div>

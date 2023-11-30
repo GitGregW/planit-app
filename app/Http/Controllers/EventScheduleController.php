@@ -9,21 +9,35 @@ use App\Models\Event;
 
 class EventScheduleController extends Controller
 {
-    public function create(Event $event){
+    public function create(Event $event)
+    {
         $schedules = $event->eventSchedules()->get()->keyBy('day');
         return Inertia::render('EventSchedules/Create', [
             'eventSlug' => $event->slug, 'schedules' => $schedules
         ]);
     }
 
-    public function store(Event $event, Request $request){
-        $schedules = $request->toArray();
-        $event->eventSchedules()->createMany($schedules);
+    public function store(Event $event, Request $request)
+    {
+        // $schedules = $request->toArray();
+        $event_schedules = $request->validate([
+            '*.opening_time' => 'required_with:*.closing_time|before:*.closing_time',
+            '*.closing_time' => 'required_with:*.opening_time|after:*.opening_time',
+        ]);
+        $event->eventSchedules()->createMany($event_schedules);
         // return json_encode("Schedules added.");
     }
 
-    public function update(Event $event, Request $request){
-        $event_schedules = $request->toArray();
+    public function update(Event $event, Request $request)
+    {
+        $event_schedules = $request->validate([
+            '*.opening_time' => 'required_with:*.closing_time|before:*.closing_time',
+            '*.closing_time' => 'required_with:*.opening_time|after:*.opening_time',
+            '*.day' => 'required',
+            '*.custom_date' => 'required_without:*.day',
+            '*.custom_repeat' => 'nullable'
+        ]);
+        
         foreach($event_schedules as $event_schedule){
             EventSchedule::updateOrInsert(['event_id' => $event['id'], 'day' => $event_schedule['day']], $event_schedule);
         }

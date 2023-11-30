@@ -16,21 +16,23 @@ class BatchSeedTest extends TestCase
         $planner = \App\Models\UserGroup::where('name', 'Planner')->first();
         $event_planners = \App\Models\User::factory(3)->for($planner)->create();
         $days_collection = collect([]);
-        $events_count = 4;
         $event_schedules_count = 4;
+        $events_total = 0;
 
         foreach($event_planners as $event_planner){
             
+            $events_count = fake()->numberBetween(2, 6);
+            $events_total += $events_count;
             /** Prepare a collection of days for Event Schedules to sequence over */
             for($i=0;$i < $events_count; $i++){
-                $days = collect(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'])->shuffle()->take(4);
+                $days = collect(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'])->shuffle()->take($event_schedules_count);
 
                 foreach($days as $day){
                     $days_collection->push($day);
                 }
             }
 
-            \App\Models\Event::factory($events_count)
+            $active_events = \App\Models\Event::factory($events_count)
                 ->state(['is_active' => 1])
                 ->for($event_planner)
                 ->has(\App\Models\EventSchedule::factory()
@@ -38,15 +40,15 @@ class BatchSeedTest extends TestCase
                     ->sequence(fn ($sequence) => ['day' => $days_collection[$sequence->index]]))
                     ->create();
             
-            \App\Models\Event::factory(2)
+            \App\Models\Event::factory(3)
                 ->state(['is_active' => 0])
                 ->for($event_planner)
                 ->create();
         }
 
         $this->assertDatabaseCount('users', 3);
-        $this->assertDatabaseCount('events', 18);
-        $this->assertDatabaseCount('event_schedules', 48);
+        $this->assertDatabaseCount('events', $events_total + 9);
+        $this->assertDatabaseCount('event_schedules', $events_total * 4);
     }
 
     public function test_batch_create_event_bookings_for_an_attendee_user(): void

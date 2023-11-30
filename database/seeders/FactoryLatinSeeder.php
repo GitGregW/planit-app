@@ -41,7 +41,7 @@ class FactoryLatinSeeder extends Seeder
         foreach($event_planners as $event_planner){
             
             $events_count = fake()->numberBetween(2, 6);
-            $event_schedules_count = fake()->numberBetween(3, 6);
+            $event_schedules_count = 4;
             /** Prepare a collection of days for Event Schedules to sequence over */
             for($i=0;$i < $events_count; $i++){
                 $days = collect(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'])->shuffle()->take($event_schedules_count);

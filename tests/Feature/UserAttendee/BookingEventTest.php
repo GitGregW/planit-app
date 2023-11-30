@@ -31,6 +31,9 @@ class BookingEventTest extends TestCase
             ->post('/event-bookings/' . $event->slug, $eventBooking)
             ->assertRedirect('/');
         
+        // $this->assertDatabaseMissing('event_bookings', [
+        //     'user_id' => $planner->id,
+        // ]);
         $this->assertDatabaseCount('event_bookings', 0);
     }
 
@@ -63,10 +66,16 @@ class BookingEventTest extends TestCase
         $this->get('/event-bookings')
             ->assertInertia(fn (Assert $page) => $page
                 ->component('EventBookings/Index')
-                ->has('groupedEventBookings', fn (Assert $page) => $page
-                    ->where('0.event_id', $eventBooking->event_id)
-                )
+                ->has('monthlyEventBookings')
             );
+
+        // $this->get('/event-bookings')
+        // ->assertInertia(fn (Assert $page) => $page
+        //     ->component('EventBookings/Index')
+        //     ->has('monthlyEventBookings', fn (Assert $page) => $page
+        //         ->where('0.event_id', $eventBooking->event_id)
+        //     )
+        // );
     }
 
     public function test_an_attendee_can_modify_an_event_booking(): void

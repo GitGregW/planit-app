@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventBookingController;
 use App\Http\Controllers\EventScheduleController;
@@ -23,18 +24,17 @@ use App\Models\Event;
 */
 
 Route::get('/', function () {
-    $activeEvents = Event::where('is_active', 1)->limit(5)->latest()->get()->transform(function ($event){
+    $active_events = Event::where('is_active', 1)->limit(5)->latest()->get()->transform(function ($event){
         $file = Storage::disk('event_images')->files($event->id);
-        $file ? $event->src = $file[0] : $event->src = '0/cZ5V1tlwn8vtCm4y0TmplP3wFuXPVnwlutSy4HVT.jpg';
+        $file ? $event->src = $file[0] : $event->src = Storage::disk('event_images')->files('0');
         return $event;
     });
-    $activeEventsCount = Event::where('is_active', 1)->count();
 
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-        'activeEvents' => $activeEvents,
-        'activeEventsCount' => $activeEventsCount,
+        'activeEvents' => $active_events,
+        'activeEventsCount' => Event::where('is_active', 1)->count(),
     ]);
 })->name('home');
 
@@ -45,30 +45,7 @@ Route::get('/', function () {
 require __DIR__.'/auth.php';
 
 Route::middleware('user_group:Planner')->group(function (){
-    Route::get('/dashboard', function () {
-        $recentEvents = Auth::User()->events()->where('is_active', 1)->limit(3)->latest()->get()->transform(function ($event){
-            $file = Storage::disk('event_images')->files($event->id);
-            $file ? $event->src = $file[0] : $event->src = $event->src = '0/cZ5V1tlwn8vtCm4y0TmplP3wFuXPVnwlutSy4HVT.jpg';
-            return $event;
-        });
-        $recentEventsCount = Auth::User()->events()->count();
-        $activeEvents = Auth::User()->events()->where('is_active', 1)->limit(3)->latest()->get()->transform(function ($event){
-            $file = Storage::disk('event_images')->files($event->id);
-            $file ? $event->src = $file[0] : $event->src = '0/cZ5V1tlwn8vtCm4y0TmplP3wFuXPVnwlutSy4HVT.jpg';
-            return $event;
-        });
-        
-        $activeEventsCount = Auth::User()->events()->where('is_active', 1)->count();
-        $inactiveEvents = Auth::User()->events()->where('is_active', 0)->limit(3)->latest()->get()->transform(function ($event){
-            $file = Storage::disk('event_images')->files($event->id);
-            $file ? $event->src = $file[0] : $event->src = '0/cZ5V1tlwn8vtCm4y0TmplP3wFuXPVnwlutSy4HVT.jpg';
-            return $event;
-        });
-        $inactiveEventsCount = Auth::User()->events()->where('is_active', 0)->count();
-        return Inertia::render('DashboardPlanner',
-            ['recentEvents' => $recentEvents, 'activeEvents' => $activeEvents, 'inactiveEvents' => $inactiveEvents, 
-            'recentEventsCount' => $recentEventsCount, 'activeEventsCount' => $activeEventsCount, 'inactiveEventsCount' => $inactiveEventsCount]);
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
     Route::post('/events', [EventController::class, 'store'])->name('events.store');

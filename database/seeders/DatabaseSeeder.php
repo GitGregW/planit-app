@@ -1,6 +1,8 @@
 <?php
 
 namespace Database\Seeders;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\File;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -12,15 +14,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        /** Setup User Groups table */
         $this->call([
             UserGroupSeeder::class,
-
-            /**
-             * FACTORY SEED FOR DEMO
-             */
-            FactoryLatinSeeder::class,
-            FactoryEnglishSeeder::class,
         ]); 
     }
 }

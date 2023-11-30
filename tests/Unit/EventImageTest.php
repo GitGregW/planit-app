@@ -12,9 +12,10 @@ class EventImageTest extends TestCase
 {
     use RefreshDatabase;
     
-    public function test_an_event_image_belongs_to_event(): void
-    {
-        $eventImage = EventImage::factory()->create();
-        $this->assertInstanceOf(Event::class, $eventImage->event);
-    }
+    /** REMOVED: No requirement to store event images in database where it can be indexed through file storage  */
+    // public function test_an_event_image_belongs_to_event(): void
+    // {
+    //     $eventImage = EventImage::factory()->create();
+    //     $this->assertInstanceOf(Event::class, $eventImage->event);
+    // }
 }

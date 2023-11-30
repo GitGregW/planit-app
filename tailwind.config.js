@@ -9,6 +9,14 @@ export default {
         './resources/views/**/*.blade.php',
         './resources/js/**/*.vue',
     ],
+    safelist: [
+        'col-[1_/_span_1]',
+        'col-[1_/_span_2]',
+        'col-[1_/_span_3]',
+        'col-[1_/_span_4]',
+        'col-[1_/_span_5]',
+        'col-[1_/_span_6]',
+      ],
 
     theme: {
         extend: {
@@ -16,6 +24,9 @@ export default {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
         },
+        fontFamily: {
+            'custom': ['Bungee', 'sans-serif'],
+        }
     },
 
     plugins: [forms],
