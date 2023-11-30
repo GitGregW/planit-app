@@ -1,5 +1,35 @@
 <p align="center"><img style="width: 56px; height: 56px; margin: 7px 0; fill: #facc15;" src="public/icons/planet-earth.svg" /></p>
 
+## Commit for 30-11-23
+
+- Introduced policy for Event model; Event Controller now has an authorizeResource construct
+- - further validation for Events/Create opening hours has to be less than closing hours
+
+- New and refactored Components (reduced code by 40%): Calendar/Day, Calendar/DayHeaders, Calendar/Schedule, Calendar/Title
+- - Componentise the above (except Calendar/Schedule which is slottable) into: Calendar/Calendar
+
+- EventBookings/Index:
+- - New interface to display a schedule of Event Bookings below each Calendar component (by month)
+- - New interface to display Event Booking icons within the Calendar component; additionally created a toggle to switch the overlay on/off
+- - Calendar months now include horizontal scroll snap point
+
+- EventBookings/Create:
+- - Reused the Calendar component which additionally accepts 'daysOpen' that will be used to disable/mute the calendered day(s) where any event is closed.
+- - Animation bounce the booking form when an available business day is clicked from the Calendar
+- - Bug Fix: click event bubbling; could not create a booking where an Event Booking was present
+
+- Mobile First Navigation Bar
+- - Sketched/Designed a Nav Bar for Mobile to appear fixed on the bottom left that toggle expands on click/press (Easy one-hand navigation for mobile users; leaving much of the right-hand for scroll/content)
+
+- Responsive Design media queries throughout
+
+- Introducing JS composables:
+- - Infinite Scroll: Events/PlannerDashboard, Events/Index (User: Attendee)
+
+- Custom Bungee font for headers
+- Planner Dashboard: New interactive sort & filter feature
+- Front end home page tweeks: Toolbar, icon and gradients
+
 ## Commit for 4-8-23
 
 - Frontend for Event Attendee User (Mobile First Design)
